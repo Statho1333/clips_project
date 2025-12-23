@@ -2,210 +2,210 @@
 (defclass Chemicals
 	(is-a USER)
 	(role abstract)
-	(single-slot are_corrosive
+	(slot are_corrosive
 		(type SYMBOL)
 		(allowed-values FALSE TRUE)
-		(cardinality 1 1)
+;		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot specific_gravity
+	(slot specific_gravity
 		(type FLOAT)
 		(range 0.9 1.1)
-		(cardinality 1 1)
+;		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot colour
+	(slot colour
 		(type SYMBOL)
 		(allowed-values white red none)
-		(cardinality 1 1)
+;		(cardinality 1 1)
 		(create-accessor read-write))
 	(multislot spectroscopy
 		(type SYMBOL)
 		(allowed-values carbon sulphur metal sodium none)
 		(cardinality 1 4)
 		(create-accessor read-write))
-	(single-slot chemical_symbol
+	(slot chemical_symbol
 		(type STRING)
-		(cardinality 0 1)
+;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(single-slot can_cause_burn_skin
+	(slot can_cause_burn_skin
 ;+		(comment "Acids can burn the skin, other chemicals dont")
 		(type SYMBOL)
 		(allowed-values FALSE TRUE)
-		(cardinality 0 1)
+;+		(cardinality 0 1)
 		(create-accessor read-write))
 	(multislot is_stored_at_warehouse
 		(type INSTANCE)
 		(allowed-classes Warehouse)
 		(cardinality 1 ?VARIABLE)
 		(create-accessor read-write))
-	(single-slot radioactivity
+	(slot radioactivity
 		(type SYMBOL)
 		(allowed-values FALSE TRUE)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot is_explosive
+	(slot is_explosive
 		(type SYMBOL)
 		(allowed-values FALSE TRUE)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot smell
+	(slot smell
 		(type SYMBOL)
 		(allowed-values choking vinegar none)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot solubility
+	(slot solubility
 ;+		(comment "Can be disolved to water")
 		(type SYMBOL)
 		(allowed-values soluble insoluble)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot pH
+	(slot pH
 		(type FLOAT)
 		(range 0.0 14.0)
-		(cardinality 0 1)
+;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(single-slot english_name
+	(slot english_name
 		(type STRING)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot is_highly_toxic
+	(slot is_highly_toxic
 		(type SYMBOL)
 		(allowed-values FALSE TRUE)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write)))
 
 (defclass AcidChemicals
 	(is-a Chemicals)
 	(role abstract)
-	(single-slot solubility
+	(slot solubility
 ;+		(comment "Can be disolved to water")
 		(type SYMBOL)
 		(allowed-values soluble)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot pH
+	(slot pH
 		(type FLOAT)
 		(range 0.0 5.99)
-		(cardinality 0 1)
+;+		(cardinality 0 1)
 		(create-accessor read-write)))
 
 (defclass StrongAcid
 	(is-a AcidChemicals)
 	(role concrete)
-	(single-slot are_corrosive
+	(slot are_corrosive
 		(type SYMBOL)
 		(allowed-values True)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot can_cause_burn_skin
+	(slot can_cause_burn_skin
 ;+		(comment "Acids can burn the skin, other chemicals dont")
 		(type SYMBOL)
 		(allowed-values True)
-		(cardinality 0 1)
+;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(single-slot pH
+	(slot pH
 		(type FLOAT)
 		(range 0.0 2.99)
-		(cardinality 0 1)
+;+		(cardinality 0 1)
 		(create-accessor read-write)))
 
 (defclass WeakAcid
 	(is-a AcidChemicals)
 	(role concrete)
-	(single-slot are_corrosive
+	(slot are_corrosive
 		(type SYMBOL)
 		(allowed-values False)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot can_cause_burn_skin
+	(slot can_cause_burn_skin
 ;+		(comment "Acids can burn the skin, other chemicals dont")
 		(type SYMBOL)
 		(allowed-values False)
-		(cardinality 0 1)
+;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(single-slot pH
+	(slot pH
 		(type FLOAT)
 		(range 3.0 5.99)
-		(cardinality 0 1)
+;+		(cardinality 0 1)
 		(create-accessor read-write)))
 
 (defclass BaseChemicals
 	(is-a Chemicals)
 	(role abstract)
-	(single-slot can_cause_burn_skin
+	(slot can_cause_burn_skin
 ;+		(comment "Acids can burn the skin, other chemicals dont")
 		(type SYMBOL)
 		(allowed-values False)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot solubility
+	(slot solubility
 ;+		(comment "Can be disolved to water")
 		(type SYMBOL)
 		(allowed-values soluble)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot pH
+	(slot pH
 		(type FLOAT)
 		(range 8.0 14.0)
-		(cardinality 0 1)
+;+		(cardinality 0 1)
 		(create-accessor read-write)))
 
 (defclass StrongBase
 	(is-a BaseChemicals)
 	(role concrete)
-	(single-slot are_corrosive
+	(slot are_corrosive
 		(type SYMBOL)
 		(allowed-values True)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot pH
+	(slot pH
 		(type FLOAT)
 		(range 11.0 14.0)
-		(cardinality 0 1)
+;+		(cardinality 0 1)
 		(create-accessor read-write)))
 
 (defclass WeakBase
 	(is-a BaseChemicals)
 	(role concrete)
-	(single-slot are_corrosive
+	(slot are_corrosive
 		(type SYMBOL)
 		(allowed-values False)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot pH
+	(slot pH
 		(type FLOAT)
 		(range 8.0 10.99)
-		(cardinality 0 1)
+;+		(cardinality 0 1)
 		(create-accessor read-write)))
 
 (defclass OilChemicals
 	(is-a Chemicals)
 	(role concrete)
-	(single-slot are_corrosive
+	(slot are_corrosive
 		(type SYMBOL)
 		(allowed-values False)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot can_cause_burn_skin
+	(slot can_cause_burn_skin
 ;+		(comment "Acids can burn the skin, other chemicals dont")
 		(type SYMBOL)
 		(allowed-values False)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot solubility
+	(slot solubility
 ;+		(comment "Can be disolved to water")
 		(type SYMBOL)
 		(allowed-values insoluble)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot pH
+	(slot pH
 		(type FLOAT)
 		(range 6.0 7.99)
-		(cardinality 0 1)
+;+		(cardinality 0 1)
 		(create-accessor read-write)))
 
 (defclass FacilityNodes
 	(is-a USER)
-	(role concrete)
+	(role abstract)
 	(multislot forward_connected_to
 		(type INSTANCE)
 		(allowed-classes FacilityNodes)
@@ -214,9 +214,9 @@
 		(type INSTANCE)
 		(allowed-classes FacilityNodes)
 		(create-accessor read-write))
-	(single-slot facility_name
+	(slot facility_name
 		(type STRING)
-		(cardinality 1 1)
+;+		(cardinality 1 1)
 		(create-accessor read-write)))
 
 (defclass Warehouse
