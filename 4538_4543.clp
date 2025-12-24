@@ -4,7 +4,7 @@
 	(role abstract)
 	(slot are_corrosive
 		(type SYMBOL)
-		(allowed-values FALSE TRUE)
+		(allowed-values yes no)
 ;		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot specific_gravity
@@ -569,3 +569,54 @@
 	(spectroscopy carbon))
 
 ) ; end of definstances
+
+
+;---------------- START OF THE PROGRAMM LOGIC ------------------
+
+;Used for the starting question
+;Returns the symbols that are available to be chosen at the beggining
+(deffunction create-specs ()
+	(create$ pH  solubility spectroscopy colour smell specific_gravity radioactivity))
+
+
+;Evaluates the right answer for the user prompt.
+;Nothing special
+(deffunction return-proper-question (?measurement)
+	(if (eq ?measurement pH) then (bind ?msg "Type pH measurement"))
+	(if (eq ?measurement solubility) then (bind ?msg "Can the chemical be diluted to water? (yes or no)"))
+	(if (eq ?measurement spectroscopy) then (bind ?msg "What is the output of the spectroscopy? (none, sulphur, carbon, sodium, metal)"))
+	(if (eq ?measurement colour) then (bind ?msg "What is the colour of the chemical? (white, red, none)"))
+	(if (eq ?measurement smell) then (bind ?msg "What is the smell of the chemical (choking, vinegar, none)"))
+	(if (eq ?measurement specific_gravity) then (bind ?msg "What is the specific gravity of the chemical (provide a number between 0.9 to 1.1)"))
+	(if (eq ?measurement radioactivity) then (bind ?msg "Is the chemical radioactive? (yes or no)"))
+	(return ?msg))
+
+;Starting rule, creates multifield "create-specs", which stores which data will user provide.
+;Sets strategy mea
+;Changes the target to goal make-questions
+(defrule initial-question
+	=>
+	(readline)
+	(bind $?measurements (create-specs))
+	(set-strategy mea)
+	(print "For which measurements will values be provided " ?measurements " ")
+	(bind $?answer (explode$ (readline)))
+	(assert (suspect-measurements $?answer))
+	(assert (goal make-questions)))
+
+;Gets the user measurements for each measurement that the user proposed that he will use
+(defrule measurements-questions
+	(goal make-questions) ; if foal is make-questions
+	(suspect-measurements $? ?m $?) ; then for each measurememnt that he will provide
+	=>
+	(readline) ; take spaces that might have been left
+	(print (str-cat (return-proper-question ?m) " ")) ; print the right message
+	(bind ?answer (explode$ (readline))) ; CHECK propably better with read instead of readline
+	(assert (answer ?m ?answer))) ; assert the answer as a fact
+
+;Reisignes the goal to make suspects
+(defrule start-suspects
+	?x <- (goal make-questions)
+	=>
+	(retract ?x)
+	(assert (goal make-suspects)))
