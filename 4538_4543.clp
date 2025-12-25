@@ -678,15 +678,17 @@
 	(retract ?x)
 	(assert (goal make-suspects)))
 
-
+;Rule that keeps in a list the suspects
+;Avoids duplicates lists
+;At the start all are suspects, but if a suspect fails at least one answer, he is considered innocent and doesnt need to pass the next test
 (defrule evaluate-suspects
 	(goal make-suspects)
-	?x <- (suspects $?start ?s $?finish)
-	(answer ?m ?v)
-	(test (not (check-measurement ?s ?m ?v)))
+	?x <- (suspects $?start ?s $?finish) ; keep me the $start and the $finish, if $s is not a suspect i will need to remove him later
+	(answer ?m ?v) ; for all the answers that the user gave me
+	(test (not (check-measurement ?s ?m ?v))) ; evaluate if he is a suspect or not
 	=>
-	(retract ?x)
-	(assert (suspects $?start $?finish))
+	(retract ?x) ; he is not so retract the old list
+	(assert (suspects $?start $?finish)) ; create the old list from start and finish remaining suspects, 
 )
 
 
