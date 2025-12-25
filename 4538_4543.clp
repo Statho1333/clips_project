@@ -1,10 +1,48 @@
 ; -------------CLASSES----------- ;;
+(defclass Measurements
+	(is-a USER)
+	(role concrete)
+	(slot pH_
+		(type SYMBOL)
+		(allowed-values no yes)
+		(create-accessor read-write))
+	(slot solubility_
+		(type SYMBOL)
+		(allowed-values no yes)
+		(create-accessor read-write))
+	(slot spectroscopy_
+		(type SYMBOL)
+		(allowed-values no yes)
+		(create-accessor read-write))
+	(slot colour_
+		(type SYMBOL)
+		(allowed-values no yes)
+		(create-accessor read-write))
+	(slot smell_
+		(type SYMBOL)
+		(allowed-values no yes)
+		(create-accessor read-write))
+	(slot specific_gravity_
+		(type SYMBOL)
+		(allowed-values no yes)
+		(create-accessor read-write))
+	(slot radioactivity_
+		(type SYMBOL)
+		(allowed-values no yes)
+		(create-accessor read-write)))
+
+
+
 (defclass Chemicals
 	(is-a USER)
 	(role abstract)
+	(slot is-suspect
+		(type SYMBOL)
+		(allowed-values no yes)
+		(create-accessor read-write))
 	(slot are_corrosive
 		(type SYMBOL)
-		(allowed-values yes no)
+		(allowed-values no yes)
 ;		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot specific_gravity
@@ -14,12 +52,12 @@
 		(create-accessor read-write))
 	(slot colour
 		(type SYMBOL)
-		(allowed-values white red none)
+		(allowed-values none white red)
 ;		(cardinality 1 1)
 		(create-accessor read-write))
 	(multislot spectroscopy
 		(type SYMBOL)
-		(allowed-values carbon sulphur metal sodium none)
+		(allowed-values none carbon sulphur metal sodium)
 		(cardinality 1 4)
 		(create-accessor read-write))
 	(slot chemical_symbol
@@ -29,7 +67,7 @@
 	(slot can_cause_burn_skin
 ;+		(comment "Acids can burn the skin, other chemicals dont")
 		(type SYMBOL)
-		(allowed-values FALSE TRUE)
+		(allowed-values no yes)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
 	(multislot is_stored_at_warehouse
@@ -39,17 +77,17 @@
 		(create-accessor read-write))
 	(slot radioactivity
 		(type SYMBOL)
-		(allowed-values FALSE TRUE)
+		(allowed-values no yes)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot is_explosive
 		(type SYMBOL)
-		(allowed-values FALSE TRUE)
+		(allowed-values no yes)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot smell
 		(type SYMBOL)
-		(allowed-values choking vinegar none)
+		(allowed-values none choking vinegar)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot solubility
@@ -69,8 +107,13 @@
 		(create-accessor read-write))
 	(slot is_highly_toxic
 		(type SYMBOL)
-		(allowed-values FALSE TRUE)
+		(allowed-values no yes)
 ;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(slot is_suspect
+		(type SYMBOL)
+		(allowed-values no yes)
+		(default no)
 		(create-accessor read-write)))
 
 (defclass AcidChemicals
@@ -568,11 +611,16 @@
 	(specific_gravity 0.9)
 	(spectroscopy carbon))
 
+([m1] of Measurements)
+
 ) ; end of definstances
 
 
 ;---------------- START OF THE PROGRAMM LOGIC ------------------
 
+
+
+;----------------------- FUNCTIONS HERE ----------------------------
 ;Used for the starting question
 ;Returns the symbols that are available to be chosen at the beggining
 (deffunction create-specs ()
@@ -591,6 +639,12 @@
 	(if (eq ?measurement radioactivity) then (bind ?msg "Is the chemical radioactive? (yes or no)"))
 	(return ?msg))
 
+;Boolean function to check if the measurement equals the slot value of the instance
+(deffunction check-measurement (?s ?m ?v) ; ?s derives from suspect ?m from measurement ?v vfrom value
+	(if (eq ?m pH) then (return (= ?v (send ?s get-pH)))) ; special treatment because it is float
+	(return (eq ?v (send ?s (sym-cat get- ?m))))) ; all other cases are the same, concat the symbol with function sym-cat
+
+
 ;Starting rule, creates multifield "create-specs", which stores which data will user provide.
 ;Sets strategy mea
 ;Changes the target to goal make-questions
@@ -598,10 +652,12 @@
 	=>
 	(readline)
 	(bind $?measurements (create-specs))
+	(bind $?chemicals (find-all-instances ((?c Chemicals)) TRUE))
 	(set-strategy mea)
 	(print "For which measurements will values be provided " ?measurements " ")
 	(bind $?answer (explode$ (readline)))
 	(assert (suspect-measurements $?answer))
+	(assert (suspects ?chemicals))
 	(assert (goal make-questions)))
 
 ;Gets the user measurements for each measurement that the user proposed that he will use
@@ -614,9 +670,23 @@
 	(bind ?answer (explode$ (readline))) ; CHECK propably better with read instead of readline
 	(assert (answer ?m ?answer))) ; assert the answer as a fact
 
+
 ;Reisignes the goal to make suspects
-(defrule start-suspects
+(defrule go-to-suspects
 	?x <- (goal make-questions)
 	=>
 	(retract ?x)
 	(assert (goal make-suspects)))
+
+
+(defrule evaluate-suspects
+	(goal make-suspects)
+	?x <- (suspects $?start ?s $?finish)
+	(answer ?m ?v)
+	(test (not (check-measurement ?s ?m ?v)))
+	=>
+	(retract ?x)
+	(assert (suspects $?start $?finish))
+)
+
+
