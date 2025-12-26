@@ -55,10 +55,10 @@
 		(allowed-values none white red)
 ;		(cardinality 1 1)
 		(create-accessor read-write))
-	(multislot spectroscopy
+	(slot spectroscopy
 		(type SYMBOL)
 		(allowed-values none carbon sulphur metal sodium)
-		(cardinality 1 4)
+;+		(cardinality 1 4)
 		(create-accessor read-write))
 	(slot chemical_symbol
 		(type STRING)
@@ -136,13 +136,13 @@
 	(role concrete)
 	(slot are_corrosive
 		(type SYMBOL)
-		(allowed-values True)
+		(allowed-values yes)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot can_cause_burn_skin
 ;+		(comment "Acids can burn the skin, other chemicals dont")
 		(type SYMBOL)
-		(allowed-values True)
+		(allowed-values yes)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
 	(slot pH
@@ -156,13 +156,13 @@
 	(role concrete)
 	(slot are_corrosive
 		(type SYMBOL)
-		(allowed-values False)
+		(allowed-values no)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot can_cause_burn_skin
 ;+		(comment "Acids can burn the skin, other chemicals dont")
 		(type SYMBOL)
-		(allowed-values False)
+		(allowed-values no)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
 	(slot pH
@@ -177,7 +177,7 @@
 	(slot can_cause_burn_skin
 ;+		(comment "Acids can burn the skin, other chemicals dont")
 		(type SYMBOL)
-		(allowed-values False)
+		(allowed-values no)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot solubility
@@ -197,7 +197,7 @@
 	(role concrete)
 	(slot are_corrosive
 		(type SYMBOL)
-		(allowed-values True)
+		(allowed-values yes)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot pH
@@ -211,7 +211,7 @@
 	(role concrete)
 	(slot are_corrosive
 		(type SYMBOL)
-		(allowed-values False)
+		(allowed-values no)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot pH
@@ -225,13 +225,13 @@
 	(role concrete)
 	(slot are_corrosive
 		(type SYMBOL)
-		(allowed-values False)
+		(allowed-values no)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot can_cause_burn_skin
 ;+		(comment "Acids can burn the skin, other chemicals dont")
 		(type SYMBOL)
-		(allowed-values False)
+		(allowed-values no)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot solubility
@@ -284,8 +284,8 @@
 (definstances starting-instances
 ([hydrochloric-acid] of  StrongAcid
 
-	(are_corrosive True)
-	(can_cause_burn_skin True)
+	(are_corrosive yes)
+	(can_cause_burn_skin yes)
 	(chemical_symbol "HCI")
 	(colour none)
 	(english_name "Hydrochloric-acid")
@@ -293,7 +293,7 @@
 		[warehouse2] ; +
 		[warehouse7]) ; +
 	(pH 2.04)
-	(radioactivity FALSE)
+	(radioactivity no)
 	(smell choking)
 	(solubility soluble)
 	(specific_gravity 1.0)
@@ -301,8 +301,8 @@
 
 ([acetic-acid] of  WeakAcid
 
-	(are_corrosive False)
-	(can_cause_burn_skin False)
+	(are_corrosive no)
+	(can_cause_burn_skin no)
 	(chemical_symbol "CH3COOH")
 	(colour none)
 	(english_name "Acetic-acid")
@@ -311,7 +311,7 @@
 		[warehouse4] ; + 
 		[warehouse8]) ; +
 	(pH 3.39)
-	(radioactivity FALSE)
+	(radioactivity no)
 	(smell vinegar)
 	(solubility soluble)
 	(specific_gravity 1.0)
@@ -319,16 +319,16 @@
 
 ([transformer-oil] of  OilChemicals
 
-	(are_corrosive False)
-	(can_cause_burn_skin False)
+	(are_corrosive no)
+	(can_cause_burn_skin no)
 	(colour none)
 	(english_name "Transformer-oil")
-	(is_highly_toxic TRUE)
+	(is_highly_toxic yes)
 	(is_stored_at_warehouse
 		[warehouse3] ; +
 		[warehouse6]) ; +
 	(pH 7.0)
-	(radioactivity FALSE)
+	(radioactivity no)
 	(smell none)
 	(solubility insoluble)
 	(specific_gravity 1.0)
@@ -336,8 +336,8 @@
 
 ([carbonic-acid] of  WeakAcid
 
-	(are_corrosive False)
-	(can_cause_burn_skin False)
+	(are_corrosive no)
+	(can_cause_burn_skin no)
 	(chemical_symbol "H2CO3")
 	(colour none)
 	(english_name "Carbonic-Acid")
@@ -346,7 +346,7 @@
 		[warehouse6] ; +
 		[warehouse8]) ; +
 	(pH 4.18)
-	(radioactivity FALSE)
+	(radioactivity no)
 	(smell none)
 	(solubility soluble)
 	(specific_gravity 1.0)
@@ -354,18 +354,18 @@
 
 ([sulphuric-acid] of  StrongAcid
 
-	(are_corrosive True)
-	(can_cause_burn_skin True)
+	(are_corrosive yes)
+	(can_cause_burn_skin yes)
 	(chemical_symbol "H2SO4")
 	(colour none)
 	(english_name "Sulphuric-acid")
-	(is_explosive FALSE)
+	(is_explosive no)
 	(is_stored_at_warehouse
 		[warehouse1] ; +
 		[warehouse5] ; +
 		[warehouse7]) ; +
 	(pH 1.87)
-	(radioactivity FALSE)
+	(radioactivity no)
 	(smell none)
 	(solubility soluble)
 	(specific_gravity 1.0)
@@ -373,14 +373,14 @@
 
 ([sodium-hydroxide] of  StrongBase
 
-	(are_corrosive True)
-	(can_cause_burn_skin False)
+	(are_corrosive yes)
+	(can_cause_burn_skin no)
 	(chemical_symbol "NaOH")
 	(colour none)
 	(english_name "Sodium-hydroxide")
 	(is_stored_at_warehouse [warehouse8]) ; +
 	(pH 11.95)
-	(radioactivity FALSE)
+	(radioactivity no)
 	(smell none)
 	(solubility soluble)
 	(specific_gravity 1.0)
@@ -454,13 +454,13 @@
 
 ([chromogen-23] of  WeakBase
 
-	(are_corrosive False)
-	(can_cause_burn_skin False)
+	(are_corrosive no)
+	(can_cause_burn_skin no)
 	(colour red)
 	(english_name "Chromogen-23")
 	(is_stored_at_warehouse [warehouse5]) ; +
 	(pH 9.5)
-	(radioactivity FALSE)
+	(radioactivity no)
 	(smell none)
 	(solubility soluble)
 	(specific_gravity 0.9)
@@ -543,14 +543,14 @@
 
 ([aluminium-hydroxide] of  WeakBase
 
-	(are_corrosive False)
-	(can_cause_burn_skin False)
+	(are_corrosive no)
+	(can_cause_burn_skin no)
 	(chemical_symbol "AI(OH)3")
 	(colour white)
 	(english_name "Aluminium-hydroxide")
 	(is_stored_at_warehouse [warehouse6]) ;+
 	(pH 9.5)
-	(radioactivity FALSE)
+	(radioactivity no)
 	(smell none)
 	(solubility soluble)
 	(specific_gravity 1.1)
@@ -580,14 +580,14 @@
 
 ([rubidium-hydroxide] of  WeakBase
 
-	(are_corrosive False)
-	(can_cause_burn_skin False)
+	(are_corrosive no)
+	(can_cause_burn_skin no)
 	(chemical_symbol "RbOH")
 	(colour none)
 	(english_name "Rubidium-hydroxide")
 	(is_stored_at_warehouse [warehouse3]) ; +
 	(pH 9.5)
-	(radioactivity TRUE)
+	(radioactivity yes)
 	(smell none)
 	(solubility soluble)
 	(specific_gravity 1.1)
@@ -595,17 +595,17 @@
 
 ([petrol] of  OilChemicals
 
-	(are_corrosive False)
-	(can_cause_burn_skin False)
+	(are_corrosive no)
+	(can_cause_burn_skin no)
 	(colour none)
 	(english_name "Petrol")
-	(is_explosive TRUE)
+	(is_explosive yes)
 	(is_stored_at_warehouse
 		[warehouse1] ; +
 		[warehouse4] ; +
 		[warehouse5]) ; +
 	(pH 7.0)
-	(radioactivity FALSE)
+	(radioactivity no)
 	(smell none)
 	(solubility insoluble)
 	(specific_gravity 0.9)
@@ -631,7 +631,7 @@
 ;Nothing special
 (deffunction return-proper-question (?measurement)
 	(if (eq ?measurement pH) then (bind ?msg "Type pH measurement"))
-	(if (eq ?measurement solubility) then (bind ?msg "Can the chemical be diluted to water? (yes or no)"))
+	(if (eq ?measurement solubility) then (bind ?msg "Can the chemical be diluted to water? (soluble or insoluble)"))
 	(if (eq ?measurement spectroscopy) then (bind ?msg "What is the output of the spectroscopy? (none, sulphur, carbon, sodium, metal)"))
 	(if (eq ?measurement colour) then (bind ?msg "What is the colour of the chemical? (white, red, none)"))
 	(if (eq ?measurement smell) then (bind ?msg "What is the smell of the chemical (choking, vinegar, none)"))
@@ -687,8 +687,9 @@
 	(answer ?m ?v) ; for all the answers that the user gave me
 	(test (not (check-measurement ?s ?m ?v))) ; evaluate if he is a suspect or not
 	=>
-	(retract ?x) ; he is not so retract the old list
+	(retract ?x) ; he is, so retract the old list
 	(assert (suspects $?start $?finish)) ; create the old list from start and finish remaining suspects, 
 )
+
 
 
