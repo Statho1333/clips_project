@@ -36,10 +36,6 @@
 (defclass Chemicals
 	(is-a USER)
 	(role abstract)
-	(slot is-suspect
-		(type SYMBOL)
-		(allowed-values no yes)
-		(create-accessor read-write))
 	(slot are_corrosive
 		(type SYMBOL)
 		(allowed-values no yes)
@@ -265,18 +261,29 @@
 (defclass Warehouse
 	(is-a FacilityNodes)
 	(role concrete)
+	(pattern-match reactive)
 	(multislot has_stored_chemicals
 		(type INSTANCE)
 		(allowed-classes Chemicals)
+		(create-accessor read-write))
+	(slot is_suspect
+		(type SYMBOL)
+		(allowed-values no yes)
 		(create-accessor read-write)))
 
 (defclass Manhole
 	(is-a FacilityNodes)
-	(role concrete))
+	(pattern-match reactive)
+	(role concrete)
+	(slot is_suspect
+		(type SYMBOL)
+		(allowed-values no yes)
+		(create-accessor read-write)))
 
 (defclass ControlStation
 	(is-a FacilityNodes)
-	(role concrete))
+	(role concrete)
+	(pattern-match reactive))
 
 
 
@@ -644,6 +651,62 @@
 	(if (eq ?m pH) then (return (= ?v (send ?s get-pH)))) ; special treatment because it is float
 	(return (eq ?v (send ?s (sym-cat get- ?m))))) ; all other cases are the same, concat the symbol with function sym-cat
 
+; Function to create a path from the warehouse to the control station
+;Return a list (the path)
+;The idea is that this list will be used for the final output aswell
+(deffunction create-path (?ch ?sp) ; ?ch derives from chemical, ?sp derives from starting point
+	(send ?sp put-is_suspect yes) ; mark the wh
+	(bind $?L (create$ ?ch ?sp)); Create a list with the name of the chemical and the warehouse where it is stored
+	(while (not (eq (class ?sp) ControlStation)) do ; check if it is not a CS (in this programm the control Station is the last facility, this is why it is the stopping rule) 
+		(bind ?sp (nth$ 1 (send ?sp get-forward_connected_to)));get the name of the facility (forward-connected-to is multislot, but in our programm we know that we have only 1 forward connection)
+		(if (eq (class ?sp) Manhole) then (send ?sp put-is_suspect yes))	
+		(bind $?L (create$ $?L ?sp))); recreate the list with the new connection
+	;(print "Path is " ?L crlf)
+	(return $?L)) ; return the list
+
+
+; Function to filter all the manholes
+; AT LEAST one manhole must be already a suspect, if not out will be empty
+(deffunction filter-manholes ($?L) ; a list of manholes
+  (bind $?out (create$)) ; create an empty list
+  (while (> (length$ $?L) 0) do 
+    (bind ?n (nth$ 1 $?L)) ; examine the first element
+    (if (eq (send ?n get-is_suspect) yes) ; if it is suspect
+      then
+        (bind $?out (create$ $?out ?n))) ; add it to the output list
+    (bind $?L (rest$ $?L))) ; check the rest of the list
+  (return $?out)) ; return all that are suspects
+
+; Function to pick only one manhole from the suspect list
+; AT LEAST  one manhole must be polluted each time it is called
+(deffunction pick-one-manhole ($?L)
+  (bind ?i 1) ; counter
+  (while (<= ?i (length$ $?L)) do 
+    (bind ?x (nth$ ?i $?L)) ; fetch me the ?i manhole ;;NEED TO ADD AN IF TO NOT PRINT MESSAGE IF THERE IS ONLY ONE PATH
+    (print "Is " ?x " polluted? (yes/no): ") ; ask if it is polluted
+    (bind ?answer (read)) ; bind the answer
+
+    (if (eq ?answer yes) then ; if it is polluted
+      (bind ?j (+ ?i 1))  ; make a counter for the rest of the list and turn suspect_is no
+      (while (<= ?j (length$ $?L)) do
+        (bind ?y (nth$ ?j $?L)) 
+		(send ?y put-is_suspect no)
+        (bind ?j (+ ?j 1))
+      )
+      (return ?x) ; return the manhole that is polluted on this stage
+    else
+      (send ?x put-is_suspect no); if it wasnt polluted, go on to next iteration
+      (bind ?i (+ ?i 1))
+    )
+  )
+  (return FALSE))
+
+
+
+  ;-------------------------------PROGRAMM FLOW------------------------------
+
+
+
 
 ;Starting rule, creates multifield "create-specs", which stores which data will user provide.
 ;Sets strategy mea
@@ -690,6 +753,81 @@
 	(retract ?x) ; he is, so retract the old list
 	(assert (suspects $?start $?finish)) ; create the old list from start and finish remaining suspects, 
 )
+
+;Reisignes the goal to second phase
+(defrule end-first-phase
+	?x <- (goal make-suspects)
+	=>
+	(retract ?x)
+	(assert (goal start-second-phase)))
+
+;Collects all the possible paths from the warehouse to the collection, for each suspect chemical
+;for each different warehouse it is stored
+(defrule collect-paths
+	(goal start-second-phase) 
+	(suspects $? ?s $?) ; for each suspect in the suspects fact
+	=>
+	(bind $?whs (send ?s get-is_stored_at_warehouse)) ; fetch me all the warehouses the suspect is stored
+	(while (> (length$ $?whs) 0) do ; while there are remaining warehouses in the $whs
+		(bind ?w (nth$ 1 $?whs)) ; take the first
+		(bind $?L (create-path ?s ?w)) ; ; find the path to the control station
+		(assert (path $?L)) ; assert it in the facts
+		(bind $?whs (rest$ $?whs)))) ; reduce the $?whs by one
+
+(defrule continue-paths
+	?x <- (goal start-second-phase)
+	=>
+	(retract ?x)
+	(assert (goal exonerate-manholes))
+	(assert (control-station start)))
+
+;Every first step starts from CS
+;It runs only 1 time
+;Its goal is to evaluate the first polluted manhole
+(defrule evaluate-suspect-manholes
+	?z <- (goal exonerate-manholes) ; we wont use time more than 1 times
+	?x <- (control-station start) ; flag
+	(object (is-a ControlStation) ; find the control station
+			(name ?cs) ; dont rly need the name for this project because there is only 1 cs
+			(backward_connected_to $?B)) ; find all the manholes that upstream to the cs
+	=>
+	(retract ?x) ; it was a flag
+	(retract ?z) ; wont use it again
+	(bind $?NewB (filter-manholes $?B)) ; fetch me all the manholes that suspect 
+	(bind ?y (pick-one-manhole $?NewB)) ; pick only one by questions from the user
+	(assert (checking ?y)) ; keep which manhole we are checking
+	(assert (goal evaluate-suspects-middle))) 
+
+
+(defrule evaluate-suspects-go-on
+	?x <- (goal evaluate-suspects-middle)
+	=>
+	(retract ?x)
+	(assert (goal evaluate-suspect-manholes2)))
+
+(defrule eval-warehouse
+  ?k <- (goal evaluate-suspect-manholes2)
+  ?x <- (checking ?y)
+  (object (is-a Warehouse) (name ?y))
+  =>
+  (retract ?k ?x)
+  (assert (goal announce-suspect))
+)
+
+(defrule eval-manhole
+  (goal evaluate-suspect-manholes2)
+  ?x <- (checking ?y)
+  (object (is-a Manhole) (name ?y) (backward_connected_to $?B))
+  =>
+  (retract ?x)
+  (bind $?NewB (filter-manholes $?B))
+  (bind ?z (pick-one-manhole $?NewB))
+  (assert (checking ?z))
+)
+
+
+
+
 
 
 
