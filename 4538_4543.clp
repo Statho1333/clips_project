@@ -1,3 +1,6 @@
+;IOANNIS STATHOPOULOS 4538
+;GEORGIOS TSIKLATIDIS 4543
+
 ; -------------CLASSES----------- ;;
 
 (defclass Chemicals
@@ -814,9 +817,10 @@
   (assert (checking ?z)) ; assert the new facility to investigate
 )
 
+
 (defrule announce-suspect
-	(goal announce-suspect-on-wh ?wh)
-	(path ?s ?wh $?)
+	(goal announce-suspect-on-wh ?wh) ; if there is a fact like this
+	(path ?s ?wh $?) ; find from the path, the chemical and print the cautions
 	=>
 	(print "The chemical that possible caused the contamination is " (instance-name-to-symbol ?s) crlf)
 	(print "Potential dangers are: " crlf)
