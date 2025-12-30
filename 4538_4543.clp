@@ -1,37 +1,4 @@
 ; -------------CLASSES----------- ;;
-(defclass Measurements
-	(is-a USER)
-	(role concrete)
-	(slot pH_
-		(type SYMBOL)
-		(allowed-values no yes)
-		(create-accessor read-write))
-	(slot solubility_
-		(type SYMBOL)
-		(allowed-values no yes)
-		(create-accessor read-write))
-	(slot spectroscopy_
-		(type SYMBOL)
-		(allowed-values no yes)
-		(create-accessor read-write))
-	(slot colour_
-		(type SYMBOL)
-		(allowed-values no yes)
-		(create-accessor read-write))
-	(slot smell_
-		(type SYMBOL)
-		(allowed-values no yes)
-		(create-accessor read-write))
-	(slot specific_gravity_
-		(type SYMBOL)
-		(allowed-values no yes)
-		(create-accessor read-write))
-	(slot radioactivity_
-		(type SYMBOL)
-		(allowed-values no yes)
-		(create-accessor read-write)))
-
-
 
 (defclass Chemicals
 	(is-a USER)
