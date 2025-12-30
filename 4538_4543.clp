@@ -36,7 +36,7 @@
 (defclass Chemicals
 	(is-a USER)
 	(role abstract)
-	(slot are_corrosive
+	(slot is_corrosive
 		(type SYMBOL)
 		(allowed-values no yes)
 ;		(cardinality 1 1)
@@ -130,7 +130,7 @@
 (defclass StrongAcid
 	(is-a AcidChemicals)
 	(role concrete)
-	(slot are_corrosive
+	(slot is_corrosive
 		(type SYMBOL)
 		(allowed-values yes)
 ;+		(cardinality 1 1)
@@ -150,7 +150,7 @@
 (defclass WeakAcid
 	(is-a AcidChemicals)
 	(role concrete)
-	(slot are_corrosive
+	(slot is_corrosive
 		(type SYMBOL)
 		(allowed-values no)
 ;+		(cardinality 1 1)
@@ -191,7 +191,7 @@
 (defclass StrongBase
 	(is-a BaseChemicals)
 	(role concrete)
-	(slot are_corrosive
+	(slot is_corrosive
 		(type SYMBOL)
 		(allowed-values yes)
 ;+		(cardinality 1 1)
@@ -205,7 +205,7 @@
 (defclass WeakBase
 	(is-a BaseChemicals)
 	(role concrete)
-	(slot are_corrosive
+	(slot is_corrosive
 		(type SYMBOL)
 		(allowed-values no)
 ;+		(cardinality 1 1)
@@ -219,7 +219,7 @@
 (defclass OilChemicals
 	(is-a Chemicals)
 	(role concrete)
-	(slot are_corrosive
+	(slot is_corrosive
 		(type SYMBOL)
 		(allowed-values no)
 ;+		(cardinality 1 1)
@@ -291,7 +291,7 @@
 (definstances starting-instances
 ([hydrochloric-acid] of  StrongAcid
 
-	(are_corrosive yes)
+	(is_corrosive yes)
 	(can_cause_burn_skin yes)
 	(chemical_symbol "HCI")
 	(colour none)
@@ -308,7 +308,7 @@
 
 ([acetic-acid] of  WeakAcid
 
-	(are_corrosive no)
+	(is_corrosive no)
 	(can_cause_burn_skin no)
 	(chemical_symbol "CH3COOH")
 	(colour none)
@@ -326,7 +326,7 @@
 
 ([transformer-oil] of  OilChemicals
 
-	(are_corrosive no)
+	(is_corrosive no)
 	(can_cause_burn_skin no)
 	(colour none)
 	(english_name "Transformer-oil")
@@ -343,7 +343,7 @@
 
 ([carbonic-acid] of  WeakAcid
 
-	(are_corrosive no)
+	(is_corrosive no)
 	(can_cause_burn_skin no)
 	(chemical_symbol "H2CO3")
 	(colour none)
@@ -361,7 +361,7 @@
 
 ([sulphuric-acid] of  StrongAcid
 
-	(are_corrosive yes)
+	(is_corrosive yes)
 	(can_cause_burn_skin yes)
 	(chemical_symbol "H2SO4")
 	(colour none)
@@ -380,7 +380,7 @@
 
 ([sodium-hydroxide] of  StrongBase
 
-	(are_corrosive yes)
+	(is_corrosive yes)
 	(can_cause_burn_skin no)
 	(chemical_symbol "NaOH")
 	(colour none)
@@ -461,7 +461,7 @@
 
 ([chromogen-23] of  WeakBase
 
-	(are_corrosive no)
+	(is_corrosive no)
 	(can_cause_burn_skin no)
 	(colour red)
 	(english_name "Chromogen-23")
@@ -550,7 +550,7 @@
 
 ([aluminium-hydroxide] of  WeakBase
 
-	(are_corrosive no)
+	(is_corrosive no)
 	(can_cause_burn_skin no)
 	(chemical_symbol "AI(OH)3")
 	(colour white)
@@ -587,7 +587,7 @@
 
 ([rubidium-hydroxide] of  WeakBase
 
-	(are_corrosive no)
+	(is_corrosive no)
 	(can_cause_burn_skin no)
 	(chemical_symbol "RbOH")
 	(colour none)
@@ -602,7 +602,7 @@
 
 ([petrol] of  OilChemicals
 
-	(are_corrosive no)
+	(is_corrosive no)
 	(can_cause_burn_skin no)
 	(colour none)
 	(english_name "Petrol")
@@ -680,6 +680,22 @@
 ; Function to pick only one manhole from the suspect list
 ; AT LEAST  one manhole must be polluted each time it is called
 (deffunction pick-one-manhole ($?L)
+  (if (= (length$ $?L) 1) then ; if it only one element no need to ask,
+  	(bind ?x (nth$ 1 $?L)) ; this is for sure the suspect
+	(return ?x))
+
+  (if (= (length$ $?L) 2) then ; special occasion where there are only 2 elements
+  	(bind ?a (nth$ 1 $?L))
+	(bind ?b (nth$ 2 $?L))
+	(print "Is " ?a " polluted? (yes/no): ")
+	(bind ?answer (read))
+	(if (eq ?answer yes) then
+		(send ?b put-is_suspect no)
+		(return ?a)
+	else
+		(send ?a put-is_suspect no)
+		(return ?b)))	
+
   (bind ?i 1) ; counter
   (while (<= ?i (length$ $?L)) do 
     (bind ?x (nth$ ?i $?L)) ; fetch me the ?i manhole ;;NEED TO ADD AN IF TO NOT PRINT MESSAGE IF THERE IS ONLY ONE PATH
@@ -700,6 +716,13 @@
     )
   )
   (return FALSE))
+
+  ;Prints the potential hazards, that the chemical can cause
+  (deffunction print-cautions (?ch)
+	(if (eq yes (send ?ch get-is_corrosive)) then (print " Corrosive" crlf))
+	(if (eq yes (send ?ch get-can_cause_burn_skin)) then (print " Can burn the skin" crlf))
+	(if (eq yes (send ?ch get-is_explosive)) then (print " Highly Explosive!" crlf))
+	(if (eq yes (send ?ch get-is_highly_toxic)) then (print " Highly toxic" crlf)))
 
 
 
@@ -805,25 +828,35 @@
 	(retract ?x)
 	(assert (goal evaluate-suspect-manholes2)))
 
+;If we find a wh, this means that we have found our suspect
 (defrule eval-warehouse
   ?k <- (goal evaluate-suspect-manholes2)
-  ?x <- (checking ?y)
-  (object (is-a Warehouse) (name ?y))
+  ?x <- (checking ?y) ; if this is a wh
+  (object (is-a Warehouse) (name ?y)) ; with a name y 
   =>
-  (retract ?k ?x)
-  (assert (goal announce-suspect))
+  (retract ?k ?x) ; retract those facts
+  (assert (goal announce-suspect-on-wh ?y)) ; 
 )
-
+;If we evaluate manholes
 (defrule eval-manhole
   (goal evaluate-suspect-manholes2)
-  ?x <- (checking ?y)
-  (object (is-a Manhole) (name ?y) (backward_connected_to $?B))
+  ?x <- (checking ?y) 
+  (object (is-a Manhole) (name ?y) (backward_connected_to $?B)); find me those facilities that this manhole is backwards connected
   =>
-  (retract ?x)
-  (bind $?NewB (filter-manholes $?B))
-  (bind ?z (pick-one-manhole $?NewB))
-  (assert (checking ?z))
+  (retract ?x) ; retract the old manhole
+  (bind $?NewB (filter-manholes $?B)) ; fetch me the suspects only
+  (bind ?z (pick-one-manhole $?NewB)) ; ask which one is the suspect
+  (assert (checking ?z)) ; assert the new facility to investigate
 )
+
+(defrule announce-suspect
+	(goal announce-suspect-on-wh ?wh)
+	(path ?s ?wh $?)
+	=>
+	(print "The chemical that possible caused the contamination is " (instance-name-to-symbol ?s) crlf)
+	(print "Potential dangers are: " crlf)
+	(print-cautions ?s)
+	(print "The root of the contamination is: " (instance-name-to-symbol ?wh) crlf))
 
 
 
