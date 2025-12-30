@@ -585,8 +585,6 @@
 	(specific_gravity 0.9)
 	(spectroscopy carbon))
 
-([m1] of Measurements)
-
 ) ; end of definstances
 
 
